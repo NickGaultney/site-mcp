@@ -1,0 +1,6 @@
+# Left out of the release zip (git archive).
+/.gitattributes export-ignore
+/.gitignore export-ignore
+/README.md export-ignore
+/release.sh export-ignore
+/rebuild export-ignore
