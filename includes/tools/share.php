@@ -14,6 +14,8 @@ class Site_MCP_Guides
      *   title: WooCommerce page styles
      *   plugins: woocommerce            (optional: applies when any of these is active)
      *   ---
+     * Files a guide hands out (templates, stylesheets) live in includes/guides/<topic>/, at the path they
+     * take in a theme.
      */
     public static function all()
     {
@@ -39,7 +41,15 @@ class Site_MCP_Guides
                 $text = substr($text, strlen($m[0]));
             }
             $plugins = array_filter(array_map('trim', explode(',', $meta['plugins'] ?? '')));
-            $all[$topic] = ['topic' => $topic, 'title' => $meta['title'] ?? $topic, 'plugins' => $plugins, 'text' => ltrim($text)];
+            $files = [];
+            $dir = SITE_MCP_DIR . "guides/$topic";
+            if (is_dir($dir)) {
+                foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS)) as $f) {
+                    $files[] = substr($f->getPathname(), strlen($dir) + 1);
+                }
+                sort($files);
+            }
+            $all[$topic] = ['topic' => $topic, 'title' => $meta['title'] ?? $topic, 'plugins' => $plugins, 'text' => ltrim($text), 'files' => $files];
         }
         return $all;
     }
@@ -69,9 +79,10 @@ add_action('site_mcp_register_tools', function () {
         Site_MCP_Tools::add('guide', [
             'group'       => 'site',
             'readonly'    => true,
-            'description' => 'Site MCP\'s standard guides: proven ways to do common jobs on WordPress sites, such as styling a plugin\'s pages or configuring a caching plugin, collected from many sites. Without a topic, lists the guides and which fit this site. Read the matching guide before working in its area and follow it unless the owner wants otherwise.',
+            'description' => 'Site MCP\'s standard guides: proven ways to do common jobs on WordPress sites, such as styling a plugin\'s pages or configuring a caching plugin, collected from many sites. Without a topic, lists the guides and which fit this site. Read the matching guide before working in its area and follow it unless the owner wants otherwise. Some guides come with files (templates, stylesheets): pass file to read one, at the path it takes in the theme.',
             'properties'  => [
                 'topic' => ['type' => 'string', 'enum' => array_keys(Site_MCP_Guides::all())],
+                'file'  => ['type' => 'string', 'description' => 'One of the guide\'s files, as listed with the guide, e.g. "woocommerce/cart/cart.php".'],
             ],
             'run'         => function ($args) {
                 $all = Site_MCP_Guides::all();
@@ -84,7 +95,13 @@ add_action('site_mcp_register_tools', function () {
                     throw new Site_MCP_Error('No guide called ' . $args['topic'] . '. Topics: ' . implode(', ', array_keys($all)));
                 }
                 $g = $all[$args['topic']];
-                return ['topic' => $g['topic'], 'title' => $g['title'], 'fits_this_site' => Site_MCP_Guides::applies($g), 'guide' => $g['text']];
+                if (!empty($args['file'])) {
+                    if (!in_array($args['file'], $g['files'], true)) {
+                        throw new Site_MCP_Error("The {$g['topic']} guide has no file " . $args['file'] . '. Its files: ' . (implode(', ', $g['files']) ?: 'none'));
+                    }
+                    return ['topic' => $g['topic'], 'file' => $args['file'], 'content' => (string) file_get_contents(SITE_MCP_DIR . "guides/{$g['topic']}/{$args['file']}")];
+                }
+                return ['topic' => $g['topic'], 'title' => $g['title'], 'fits_this_site' => Site_MCP_Guides::applies($g), 'guide' => $g['text']] + ($g['files'] ? ['files' => $g['files']] : []);
             },
         ]);
     }
