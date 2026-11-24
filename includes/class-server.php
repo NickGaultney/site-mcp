@@ -231,7 +231,17 @@ TXT;
         if ($can(Site_MCP_Code::theme()) && current_user_can('install_themes')) {
             $layout .= "\n- To rebuild the site in a new theme (for example to replace Elementor), first call rebuild_guide and follow it: build beside the live theme with theme_create, preview with theme_preview_link, and switch with theme_activate only when the owner says so.";
         }
-        $text = sprintf($text, home_url('/'), $layout . "\n" . $theme);
+        $standards = '';
+        $site_tools = in_array('site', Site_MCP_Tools::enabled_groups(), true);
+        if ($site_tools && ($guides = Site_MCP_Guides::applicable())) {
+            $standards .= "\n- Site MCP has standard guides for this site: " . implode('; ', array_map(function ($g) {
+                return "{$g['title']} (guide topic {$g['topic']})";
+            }, $guides)) . '. Read the matching guide with the guide tool before working in its area, and follow it unless the owner wants otherwise.';
+        }
+        if ($site_tools && Site_MCP_Share::enabled()) {
+            $standards .= "\n- The owner shares improvements with Site MCP's maintainer, so every site can get them. When you finish something another WordPress site could reuse and have checked that it works, call suggest_standard once: styling for a plugin's own pages (such as WooCommerce), a tuned plugin configuration (such as LiteSpeed Cache), a fix for a plugin conflict, or a performance, accessibility or security improvement. Not brand colours, copy or anything only this site needs, and never passwords, keys or customer data. Tell the owner what you shared.";
+        }
+        $text = sprintf($text, home_url('/'), $layout . "\n" . $theme . $standards);
         $extra = trim((string) get_option('site_mcp_instructions', ''));
         return $extra ? $text . "\n\nNotes from the site owner:\n" . $extra : $text;
     }

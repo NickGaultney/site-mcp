@@ -29,6 +29,7 @@ class Site_MCP_Admin
         add_action('admin_post_site_mcp_health_test', [__CLASS__, 'health_test']);
         add_action('admin_post_site_mcp_alert_email', [__CLASS__, 'alert_email']);
         add_action('admin_post_site_mcp_fluent_cart', [__CLASS__, 'fluent_cart']);
+        add_action('admin_post_site_mcp_share', [__CLASS__, 'share']);
         add_action('admin_notices', [__CLASS__, 'quiet_notices'], 1);
     }
 
@@ -294,6 +295,51 @@ class Site_MCP_Admin
         self::notice($invalid ? 'error' : 'ok', $invalid ? 'Not valid email addresses, so left out: ' . implode(', ', $invalid) : 'Alerts go to ' . (implode(', ', Site_MCP_Health::recipients()) ?: 'nobody') . '.');
         wp_safe_redirect(admin_url('options-general.php?page=' . self::PAGE . '#smcp-health'));
         exit;
+    }
+
+    public static function share()
+    {
+        self::guard('site_mcp_share');
+        if (Site_MCP_Share::locked()) {
+            wp_die('Sharing is set in wp-config.php (SITE_MCP_SHARE).');
+        }
+        Site_MCP_Share::set_enabled(!empty($_POST['share']));
+        $status = Site_MCP_Share::status();
+        self::notice($status['error'] ? 'error' : 'ok', $status['error'] ?: ($status['enabled'] ? 'Sharing improvements is on.' : 'Sharing improvements is off.'));
+        wp_safe_redirect(admin_url('options-general.php?page=' . self::PAGE . '#smcp-share'));
+        exit;
+    }
+
+    private static function share_card($form)
+    {
+        if (!current_user_can('manage_options')) {
+            return;
+        }
+        $status = Site_MCP_Share::status();
+        ?>
+        <form method="post" action="<?php echo $form; ?>" class="smcp-card" id="smcp-share">
+            <?php wp_nonce_field('site_mcp_share'); ?>
+            <input type="hidden" name="action" value="site_mcp_share">
+            <div class="smcp-card__head smcp-card__head--row">
+                <div>
+                    <h2>Share improvements</h2>
+                    <p>When Claude builds something other sites could reuse, such as better WooCommerce page styles or a tuned caching setup, it can send it to Site MCP's maintainer. The best suggestions become part of Site MCP for every site. The site's name and domain are replaced before sending, and secrets are left out.</p>
+                </div>
+                <?php if (!$status['locked']) : ?><button class="smcp-btn smcp-btn--primary">Save</button><?php endif; ?>
+            </div>
+            <div class="smcp-toggles">
+                <label class="smcp-toggle">
+                    <input type="checkbox" name="share" value="1" <?php checked($status['enabled']); ?> <?php disabled($status['locked']); ?>>
+                    <span class="smcp-switch" aria-hidden="true"></span>
+                    <span class="smcp-toggle__text">
+                        <strong>Let Claude suggest improvements</strong>
+                        <span><?php echo esc_html($status['enabled'] ? ($status['sent'] ? $status['sent'] . ' sent, the last ' . self::ago($status['last_sent']) . '.' : 'Nothing sent yet.') : 'Off. Nothing is sent.'); ?><?php echo $status['locked'] ? ' Set in wp-config.php (SITE_MCP_SHARE).' : ''; ?></span>
+                        <?php if ($status['error']) : ?><span class="smcp-toggle__warn"><?php echo esc_html($status['error']); ?></span><?php endif; ?>
+                    </span>
+                </label>
+            </div>
+        </form>
+        <?php
     }
 
     private static function health_card($form)
@@ -837,6 +883,7 @@ class Site_MCP_Admin
             <?php self::themes_card($form); ?>
             <?php self::backups_card($form); ?>
             <?php self::health_card($form); ?>
+            <?php self::share_card($form); ?>
 
             <div class="smcp-grid">
                 <?php self::features_card($form); ?>

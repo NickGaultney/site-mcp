@@ -4,7 +4,7 @@ Tags: mcp, claude, ai, oauth, block theme
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.6.2
+Stable tag: 1.7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -35,6 +35,8 @@ Claude gets tools for:
 * Plugins (administrators only): list, install from WordPress.org, and turn on and off, with the site checked after each change.
 * Site Features (administrators only): custom functionality such as post types, a CRM, email automations or integrations. Site MCP creates a separate plugin, Site Features, the first time Claude builds one, so features keep working if the theme changes. Each feature is a folder in that plugin, with the same checks, version history and undo as the theme.
 
+* Sharing improvements (off until the owner turns it on in Settings → Site MCP): when Claude builds something other sites could reuse, such as styles for a plugin's pages or a tuned caching setup, it sends it to Site MCP's maintainer for review. The site's name and domain are replaced and secret-looking settings removed before sending. Adopted improvements come back to every site as standard guides, which Claude reads when they fit the site's plugins.
+
 Each tool checks the signed-in person's own capabilities, and every change is recorded in an activity log.
 
 == Installation ==
@@ -56,6 +58,8 @@ Each tool checks the signed-in person's own capabilities, and every change is re
 * `SITE_MCP_BACKUP_DIR`: where to keep backups. By default beside the WordPress folder, and inside wp-content (with an unguessable name) when that location isn't writable.
 * `SITE_MCP_GITHUB_TOKEN`: a read-only GitHub token, needed for updates only while the plugin's repository is private.
 * `SITE_MCP_DISABLE_UPDATES`: turns off update checks. Otherwise new releases install themselves.
+* `SITE_MCP_SHARE`: `true` or `false` turns sharing improvements on or off and locks the setting on Settings → Site MCP.
+* `SITE_MCP_SHARE_URL`: where shared improvements go, instead of https://standards.gauws.com.
 * `SITE_MCP_ALERT_EMAIL`: who to email when the site strains its server, overriding the Alert email setting on Settings → Site MCP and locking it so it can't be changed from the dashboard. Several addresses can be separated by commas, and `''` turns the emails off; the checks still show on the settings page.
 
 == Frequently Asked Questions ==
@@ -73,6 +77,13 @@ Click Revoke next to their name on Settings → Site MCP. Every app they connect
 Its tables, settings and access grants are removed. The Site Features plugin and its features keep running, backups stay in their folder, and the version history of the theme and Site Features is kept, so reinstalling Site MCP picks it up again.
 
 == Changelog ==
+
+= 1.7.0 =
+* Share improvements: an opt-in setting on Settings → Site MCP. When it's on, Claude can send reusable work (styles for a plugin's pages, tuned plugin settings, fixes) to Site MCP's maintainer with the new suggest_standard tool. The site's name and domain are replaced and secret-looking settings removed before sending.
+* guide: Site MCP's standard guides, adopted from shared improvements. Claude is told which guides fit the site's active plugins.
+* elementor_page_get marks elements hidden on some devices, and those hidden on every device so a rebuild leaves them out. elementor_overview counts the hidden ones per page.
+* The rebuild playbook builds the faithful copy around measuring: computed styles and an element-by-element diff of the live site and the preview at five widths, with the new capture, diff and probe scripts in the rebuild kit.
+* theme_preview_link explains how to leave a preview (?site_mcp_preview=off).
 
 = 1.6.2 =
 * Alert email setting under Server health on Settings → Site MCP. Alerts go there, or to the site's admin email until it's set, instead of a fixed address. SITE_MCP_ALERT_EMAIL still overrides it.

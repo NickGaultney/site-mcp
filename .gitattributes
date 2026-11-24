@@ -4,3 +4,4 @@
 /README.md export-ignore
 /release.sh export-ignore
 /rebuild export-ignore
+/.claude export-ignore

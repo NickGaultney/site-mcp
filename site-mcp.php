@@ -3,7 +3,7 @@
  * Plugin Name: Site MCP
  * Plugin URI: https://github.com/NickGaultney/site-mcp
  * Description: A remote MCP server that lets approved users connect their own Claude (Claude Code or a claude.ai connector) to edit this site's content, design and store, and build custom features. No shell or server access.
- * Version: 1.6.2
+ * Version: 1.7.0
  * Requires at least: 6.9
  * Requires PHP: 8.1
  * Author: Gauws
@@ -13,7 +13,7 @@
 
 defined('ABSPATH') || exit;
 
-define('SITE_MCP_VERSION', '1.6.2');
+define('SITE_MCP_VERSION', '1.7.0');
 define('SITE_MCP_DIR', __DIR__ . '/includes/');
 define('SITE_MCP_FILE', __FILE__);
 
@@ -22,6 +22,7 @@ require SITE_MCP_DIR . 'class-tools.php';
 require SITE_MCP_DIR . 'class-code.php';
 require SITE_MCP_DIR . 'class-backup.php';
 require SITE_MCP_DIR . 'class-health.php';
+require SITE_MCP_DIR . 'class-share.php';
 require_once SITE_MCP_DIR . 'class-preview.php'; // The must-use preview loader may have loaded it already.
 require SITE_MCP_DIR . 'class-server.php';
 require SITE_MCP_DIR . 'class-oauth.php';

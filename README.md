@@ -7,7 +7,9 @@ A WordPress plugin that lets the people you choose connect their own Claude to a
 - Fluent Cart and Fluent Forms;
 - theme code, with version history;
 - custom features (post types, a CRM, automations), built in a separate Site Features plugin with the same version history;
-- a full rebuild in a new theme (for example away from Elementor), previewed privately and switched over with one-click switch back. See [rebuild/](rebuild/) for the screenshot and Lighthouse kit used alongside it.
+- a full rebuild in a new theme (for example away from Elementor), previewed privately and switched over with one-click switch back. See [rebuild/](rebuild/) for the measurement and Lighthouse kit used alongside it.
+
+Sites can also share what they improve. With sharing turned on, Claude sends reusable work (plugin page styles, tuned plugin settings, fixes) to an inbox for review, through the `suggest_standard` tool. What's adopted comes back to every site as a guide in `includes/guides/`, served by the `guide` tool. The inbox is a separate service ([site-mcp-inbox](https://standards.gauws.com)), and the `review-suggestions` skill in `.claude/skills/` walks through reviewing it.
 
 Every action runs under that person's WordPress permissions, and nobody gets server or shell access.
 
@@ -44,6 +46,9 @@ Sites see the update within about 12 hours, or straight away with "Check for upd
   - `rebuild.md`: the rebuild playbook, served by the `rebuild_guide` tool and the `rebuild_site` prompt.
   - `class-code.php`: code folders with version history: the theme, and the Site Features plugin it creates.
   - `class-log.php`: the activity log.
+  - `class-share.php`: sharing improvements with the inbox (registration, scrubbing names, domains and secrets, sending).
+  - `guides/`: standard guides adopted from shared improvements, served by the `guide` tool (format in its README).
   - `tools/*.php`: the tools, one file per group.
 - `rebuild/`: the rebuild kit (not in the zip).
+- `.claude/skills/review-suggestions/`: how to review the inbox and adopt standards (not in the zip).
 - `vendor/plugin-update-checker`: [YahnisElsts/plugin-update-checker](https://github.com/YahnisElsts/plugin-update-checker) v5.7, MIT licensed.
