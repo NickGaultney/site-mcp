@@ -4,7 +4,7 @@ Tags: mcp, claude, ai, oauth, block theme
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.7.0
+Stable tag: 1.8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -35,6 +35,9 @@ Claude gets tools for:
 * Plugins (administrators only): list, install from WordPress.org, and turn on and off, with the site checked after each change.
 * Site Features (administrators only): custom functionality such as post types, a CRM, email automations or integrations. Site MCP creates a separate plugin, Site Features, the first time Claude builds one, so features keep working if the theme changes. Each feature is a folder in that plugin, with the same checks, version history and undo as the theme.
 
+* Built-in media folders: a folder tree beside Media → Library and in every media picker, drag and drop, uploads into a folder, Folder and File size columns, and zip download of a folder. It uses FileBird's folders, so a site's existing folders carry over.
+* Built-in analytics on Dashboard → Analytics: cookie-free visitors, page views, sources, campaigns, devices, time zones, and form and order conversions with the sources they came from. No IP addresses are kept, and signed-in staff and bots aren't counted. Claude can read it with the analytics_report tool.
+* Both replace a plugin (FileBird, Site Kit by Google), which Site MCP switches off once, only when nothing on the site depends on what that plugin alone does, and never deletes. Each can be turned off under Built-in features on Settings → Site MCP.
 * Sharing improvements (off until the owner turns it on in Settings → Site MCP): when Claude builds something other sites could reuse, such as styles for a plugin's pages or a tuned caching setup, it sends it to Site MCP's maintainer for review. The site's name and domain are replaced and secret-looking settings removed before sending. Adopted improvements come back to every site as standard guides, which Claude reads when they fit the site's plugins.
 
 Each tool checks the signed-in person's own capabilities, and every change is recorded in an activity log.
@@ -77,6 +80,12 @@ Click Revoke next to their name on Settings → Site MCP. Every app they connect
 Its tables, settings and access grants are removed. The Site Features plugin and its features keep running, backups stay in their folder, and the version history of the theme and Site Features is kept, so reinstalling Site MCP picks it up again.
 
 == Changelog ==
+
+= 1.8.0 =
+* Built-in media folders, replacing FileBird: a folder tree beside Media → Library (grid and list), drag files or folders to move them, a folder filter in every media picker, uploads into the chosen folder, a Folder field on each file, Folder and File size columns, and zip download of a folder. It reads and writes FileBird's own folders, so nothing is migrated and FileBird can be switched back on.
+* Built-in analytics, replacing Site Kit by Google: Dashboard → Analytics and a dashboard widget show visitors, page views, pages per visit, bounce rate, top and entry pages, sources, referring sites, utm campaigns, devices, browsers, operating systems, visitor time zones, pages not found, and Fluent Forms, WooCommerce and Fluent Cart conversions credited to their sources. Cookie-free, with no IP addresses kept. New analytics_report tool.
+* FileBird and Site Kit are switched off once each when the built-in feature takes over, unless the site relies on something only they do (FileBird's gallery block or per-user folders; Site Kit's AdSense, Google Ads, Tag Manager, Sign in with Google or Reader Revenue Manager). The reason shows under Built-in features on Settings → Site MCP, where either feature can be turned off.
+* guide: guides can come with files (templates, stylesheets), served one at a time. New standard guides: woocommerce (WooCommerce pages styled by a classic theme) and woocommerce-emails (branded WooCommerce and account emails).
 
 = 1.7.0 =
 * Share improvements: an opt-in setting on Settings → Site MCP. When it's on, Claude can send reusable work (styles for a plugin's pages, tuned plugin settings, fixes) to Site MCP's maintainer with the new suggest_standard tool. The site's name and domain are replaced and secret-looking settings removed before sending.

@@ -30,6 +30,7 @@ class Site_MCP_Admin
         add_action('admin_post_site_mcp_alert_email', [__CLASS__, 'alert_email']);
         add_action('admin_post_site_mcp_fluent_cart', [__CLASS__, 'fluent_cart']);
         add_action('admin_post_site_mcp_share', [__CLASS__, 'share']);
+        add_action('admin_post_site_mcp_builtins', [__CLASS__, 'builtins']);
         add_action('admin_notices', [__CLASS__, 'quiet_notices'], 1);
     }
 
@@ -308,6 +309,57 @@ class Site_MCP_Admin
         self::notice($status['error'] ? 'error' : 'ok', $status['error'] ?: ($status['enabled'] ? 'Sharing improvements is on.' : 'Sharing improvements is off.'));
         wp_safe_redirect(admin_url('options-general.php?page=' . self::PAGE . '#smcp-share'));
         exit;
+    }
+
+    public static function builtins()
+    {
+        self::guard('site_mcp_builtins');
+        update_option(Site_MCP_Media_Folders::OPTION, empty($_POST['media_folders']) ? '0' : '1');
+        update_option(Site_MCP_Analytics::OPTION, empty($_POST['analytics']) ? '0' : '1');
+        delete_transient('site_mcp_takeover_ran');
+        Site_MCP_Takeover::maybe_run();
+        self::notice('ok', 'Built-in features saved.');
+        wp_safe_redirect(admin_url('options-general.php?page=' . self::PAGE . '#smcp-builtins'));
+        exit;
+    }
+
+    private static function builtins_card($form)
+    {
+        if (!current_user_can('manage_options')) {
+            return;
+        }
+        $taken = Site_MCP_Takeover::summary();
+        $folders_note = Site_MCP_Media_Folders::enabled() ? (Site_MCP_Media_Folders::blocked() ? 'Waiting: ' . Site_MCP_Media_Folders::blocked() : 'On. Folders show beside Media → Library and in every media picker.') : 'Off.';
+        $rows = [
+            ['media_folders', 'Media folders', Site_MCP_Media_Folders::enabled(), 'Folders for the Media Library: drag files into folders, filter any media picker by folder, upload into a folder, download a folder as a zip. Replaces FileBird and keeps its folders.', trim($folders_note . ' ' . ($taken['filebird'] ?? ''))],
+            ['analytics', 'Analytics', Site_MCP_Analytics::enabled(), 'Cookie-free visitor analytics on Dashboard → Analytics: visitors, pages, sources, campaigns, devices and form and order conversions. No IP addresses kept; staff and bots aren\'t counted. Replaces Site Kit by Google.', trim((Site_MCP_Analytics::enabled() ? 'On.' : 'Off. Past reports stay readable.') . ' ' . ($taken['site-kit'] ?? ''))],
+        ];
+        ?>
+        <form method="post" action="<?php echo $form; ?>" class="smcp-card" id="smcp-builtins">
+            <?php wp_nonce_field('site_mcp_builtins'); ?>
+            <input type="hidden" name="action" value="site_mcp_builtins">
+            <div class="smcp-card__head smcp-card__head--row">
+                <div>
+                    <h2>Built-in features</h2>
+                    <p>Things every site needs, built into Site MCP so they don't need another plugin. When one replaces a plugin, that plugin is switched off once, only if nothing on the site depends on what it alone does, and never deleted.</p>
+                </div>
+                <button class="smcp-btn smcp-btn--primary">Save</button>
+            </div>
+            <div class="smcp-toggles">
+                <?php foreach ($rows as [$key, $label, $on, $about, $status]) : ?>
+                    <label class="smcp-toggle">
+                        <input type="checkbox" name="<?php echo esc_attr($key); ?>" value="1" <?php checked($on); ?>>
+                        <span class="smcp-switch" aria-hidden="true"></span>
+                        <span class="smcp-toggle__text">
+                            <strong><?php echo esc_html($label); ?></strong>
+                            <span><?php echo esc_html($about); ?></span>
+                            <span><?php echo esc_html($status); ?></span>
+                        </span>
+                    </label>
+                <?php endforeach; ?>
+            </div>
+        </form>
+        <?php
     }
 
     private static function share_card($form)
@@ -883,6 +935,7 @@ class Site_MCP_Admin
             <?php self::themes_card($form); ?>
             <?php self::backups_card($form); ?>
             <?php self::health_card($form); ?>
+            <?php self::builtins_card($form); ?>
             <?php self::share_card($form); ?>
 
             <div class="smcp-grid">

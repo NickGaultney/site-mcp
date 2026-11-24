@@ -46,6 +46,9 @@ Sites see the update within about 12 hours, or straight away with "Check for upd
   - `rebuild.md`: the rebuild playbook, served by the `rebuild_guide` tool and the `rebuild_site` prompt.
   - `class-code.php`: code folders with version history: the theme, and the Site Features plugin it creates.
   - `class-log.php`: the activity log.
+  - `class-media-folders.php`: built-in Media Library folders (FileBird's tables), with `assets/media-folders.*`.
+  - `class-analytics.php`: built-in cookie-free analytics, the Analytics dashboard and the `analytics_report` tool, with `assets/analytics.*`.
+  - `class-takeover.php`: switches FileBird and Site Kit off once, when the built-in features can safely replace them.
   - `class-share.php`: sharing improvements with the inbox (registration, scrubbing names, domains and secrets, sending).
   - `guides/`: standard guides adopted from shared improvements, served by the `guide` tool (format in its README).
   - `tools/*.php`: the tools, one file per group.

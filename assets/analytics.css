@@ -1,0 +1,55 @@
+/* Analytics dashboard (Site_MCP_Analytics::render). WordPress admin colours: one series in admin blue. */
+.smcpa { --a-series: #2271b1; --a-ink: #1d2327; --a-muted: #646970; --a-line: #dcdcde; --a-soft: #f0f6fc; --a-good: #00a32a; --a-bad: #d63638; max-width: 1400px; }
+.smcpa-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin: 8px 0 16px; }
+.smcpa-head h1 { padding: 0; }
+.smcpa-ranges { display: flex; flex-wrap: wrap; gap: 4px; }
+.smcpa-ranges a { padding: 6px 12px; border: 1px solid var(--a-line); border-radius: 4px; background: #fff; color: var(--a-ink); text-decoration: none; }
+.smcpa-ranges a[aria-current] { background: var(--a-series); border-color: var(--a-series); color: #fff; }
+
+.smcpa-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.smcpa-tile { display: flex; flex-direction: column; gap: 2px; padding: 14px 16px; background: #fff; border: 1px solid var(--a-line); border-radius: 6px; }
+.smcpa-tile__label { color: var(--a-muted); font-size: 13px; }
+.smcpa-tile__value { color: var(--a-ink); font-size: 26px; line-height: 1.25; font-weight: 600; font-variant-numeric: tabular-nums; }
+.smcpa-tile__change { font-size: 12px; font-weight: 600; }
+.smcpa-tile__change span { color: var(--a-muted); font-weight: 400; }
+.smcpa-tile__change.is-good { color: var(--a-good); }
+.smcpa-tile__change.is-bad { color: var(--a-bad); }
+
+.smcpa-card { padding: 16px 18px; background: #fff; border: 1px solid var(--a-line); border-radius: 6px; min-width: 0; }
+.smcpa-card h2 { margin: 0 0 12px; font-size: 14px; color: var(--a-ink); }
+.smcpa-chart-card { margin-bottom: 16px; }
+.smcpa-chart-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
+.smcpa-chart-head h2 { margin: 0; }
+.smcpa-switch { display: inline-flex; border: 1px solid var(--a-line); border-radius: 4px; overflow: hidden; }
+.smcpa-switch button { padding: 5px 12px; border: 0; background: #fff; color: var(--a-ink); cursor: pointer; font-size: 13px; }
+.smcpa-switch button + button { border-left: 1px solid var(--a-line); }
+.smcpa-switch button[aria-pressed="true"] { background: var(--a-soft); color: var(--a-series); font-weight: 600; }
+
+.smcpa-chart { position: relative; width: 100%; min-height: 260px; }
+.smcpa-chart svg { display: block; overflow: visible; max-width: 100%; height: auto; }
+.smcpa-gridline { stroke: #f0f0f1; stroke-width: 1; }
+.smcpa-axis { stroke: var(--a-line); stroke-width: 1; }
+.smcpa-tick { fill: var(--a-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.smcpa-line { fill: none; stroke: var(--a-series); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.smcpa-area { fill: var(--a-series); fill-opacity: .08; stroke: none; }
+.smcpa-cross { stroke: var(--a-muted); stroke-width: 1; stroke-dasharray: 3 3; }
+.smcpa-dot { fill: var(--a-series); stroke: #fff; stroke-width: 2; }
+.smcpa-chart rect:focus { outline: none; }
+.smcpa-chart rect:focus-visible { outline: 2px solid var(--a-series); outline-offset: 2px; }
+.smcpa-tip { position: absolute; pointer-events: none; padding: 8px 10px; background: var(--a-ink); color: #fff; border-radius: 4px; font-size: 12px; line-height: 1.5; white-space: nowrap; box-shadow: 0 2px 8px rgb(0 0 0 / .15); }
+.smcpa-tip span { color: #c3c4c7; }
+.smcpa-tip strong { font-size: 14px; }
+.smcpa-table { margin-top: 8px; }
+.smcpa-table summary { cursor: pointer; color: var(--a-series); }
+.smcpa-table table { margin-top: 8px; max-width: 520px; }
+
+.smcpa-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(380px, 100%), 1fr)); gap: 16px; }
+.smcpa-list { list-style: none; margin: 0; padding: 0; }
+.smcpa-list li { position: relative; display: flex; justify-content: space-between; gap: 12px; padding: 5px 8px; margin: 0 0 2px; }
+.smcpa-bar { position: absolute; inset: 0 auto 0 0; background: var(--a-soft); border-radius: 3px; }
+.smcpa-name, .smcpa-num { position: relative; }
+.smcpa-name { color: var(--a-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.smcpa-num { color: var(--a-ink); font-variant-numeric: tabular-nums; font-weight: 600; }
+.smcpa-empty, .smcpa-note, .smcpa-foot { color: var(--a-muted); }
+.smcpa-note { margin: 10px 0 0; font-size: 12px; }
+.smcpa-foot { margin-top: 16px; font-size: 12px; }
