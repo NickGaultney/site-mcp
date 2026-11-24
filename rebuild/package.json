@@ -1,11 +1,12 @@
 {
   "name": "site-mcp-rebuild",
   "private": true,
-  "description": "Screenshot comparison and Lighthouse for rebuilding a site with Site MCP.",
+  "description": "Measurement, comparison and Lighthouse for rebuilding a site with Site MCP.",
   "type": "module",
   "devDependencies": {
     "chrome-launcher": "1.2.3",
     "lighthouse": "12.2.1",
-    "playwright-core": "1.49.1"
+    "playwright-core": "1.49.1",
+    "pngjs": "7.0.0"
   }
 }

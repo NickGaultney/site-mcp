@@ -77,6 +77,46 @@ class Site_MCP_Elementor
         return $globals;
     }
 
+    /** The devices this site's Elementor designs for: desktop plus the kit's active breakpoints. */
+    public static function devices()
+    {
+        static $devices = null;
+        if ($devices === null) {
+            $kit = (array) get_post_meta((int) get_option('elementor_active_kit'), '_elementor_page_settings', true);
+            $active = !empty($kit['active_breakpoints']) ? (array) $kit['active_breakpoints'] : ['viewport_mobile', 'viewport_tablet'];
+            $devices = array_merge(['desktop'], array_map(function ($b) {
+                return preg_replace('/^viewport_/', '', $b);
+            }, $active));
+        }
+        return $devices;
+    }
+
+    /** "" when an element shows everywhere, else a note naming the devices Elementor hides it on. */
+    public static function hidden_note(array $settings)
+    {
+        $hidden = array_values(array_filter(self::devices(), function ($device) use ($settings) {
+            return !empty($settings["hide_$device"]);
+        }));
+        if (!$hidden) {
+            return '';
+        }
+        return count($hidden) === count(self::devices()) ? ' [HIDDEN ON EVERY DEVICE: never seen, do not rebuild]' : ' [hidden on ' . implode(', ', $hidden) . ']';
+    }
+
+    /** How many elements in a page are hidden on every device. */
+    public static function hidden_everywhere(array $elements)
+    {
+        $count = 0;
+        foreach ($elements as $el) {
+            if (str_starts_with(self::hidden_note((array) ($el['settings'] ?? [])), ' [HIDDEN')) {
+                $count++;
+            } elseif (!empty($el['elements'])) {
+                $count += self::hidden_everywhere($el['elements']);
+            }
+        }
+        return $count;
+    }
+
     private static function resolve_globals(array $refs)
     {
         $globals = self::globals();
@@ -92,7 +132,7 @@ class Site_MCP_Elementor
 
     /**
      * An indented outline of a page's elements, one per line:
-     *   container {settings}
+     *   container [hidden on mobile] {settings}
      *     heading "About me" {header_size: h1}
      */
     public static function outline(array $elements, $full, $depth = 0)
@@ -101,6 +141,7 @@ class Site_MCP_Elementor
         foreach ($elements as $el) {
             $type = ($el['elType'] ?? '') === 'widget' ? ($el['widgetType'] ?? 'widget') : ($el['elType'] ?? '?');
             $settings = (array) ($el['settings'] ?? []);
+            $hidden = self::hidden_note($settings);
             $refs = (array) ($settings['__globals__'] ?? []);
             unset($settings['__globals__']);
             if (!$full) {
@@ -120,7 +161,7 @@ class Site_MCP_Elementor
                     break;
                 }
             }
-            $lines[] = str_repeat('  ', $depth) . $type . $text . ($settings ? ' ' . wp_json_encode($settings, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) : '');
+            $lines[] = str_repeat('  ', $depth) . $type . $text . $hidden . ($settings ? ' ' . wp_json_encode($settings, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) : '');
             if (!empty($el['elements'])) {
                 $lines = array_merge($lines, self::outline($el['elements'], $full, $depth + 1));
             }
@@ -186,7 +227,11 @@ add_action('site_mcp_register_tools', function () {
                 } else {
                     $doc['link'] = wp_make_link_relative(get_permalink($post));
                 }
-                $doc['widgets'] = Site_MCP_Elementor::widgets(Site_MCP_Elementor::data($post->ID));
+                $data = Site_MCP_Elementor::data($post->ID);
+                $doc['widgets'] = Site_MCP_Elementor::widgets($data);
+                if ($hidden = Site_MCP_Elementor::hidden_everywhere($data)) {
+                    $doc['hidden_everywhere'] = $hidden;
+                }
                 $documents[] = $doc;
             }
             return [
@@ -197,6 +242,7 @@ add_action('site_mcp_register_tools', function () {
                     'Widgets named form are Elementor Pro forms: rebuild them in Fluent Forms. fluent-form-widget embeds an existing Fluent Form (use its shortcode).',
                     'Theme-builder templates (header, footer, single-post, archive, popup) apply site-wide according to their conditions.',
                     'Generated CSS for any document: elementor_page_get with css=true (the kit\'s CSS is the kit id).',
+                    'hidden_everywhere counts elements hidden on every device (' . implode(', ', Site_MCP_Elementor::devices()) . '): visitors never see them, so a rebuild leaves them out. elementor_page_get marks them, and elements hidden on some devices.',
                 ],
             ];
         },
@@ -206,7 +252,7 @@ add_action('site_mcp_register_tools', function () {
         'group'       => 'content',
         'readonly'    => true,
         'cap'         => 'edit_theme_options',
-        'description' => 'Read one Elementor page or template as an indented outline: every section, container and widget with its text, links, images and settings. detail=content (default) leaves out styling; detail=full includes every setting with global colours and fonts resolved. css=true adds the CSS Elementor generated for it, the most exact record of how it looks.',
+        'description' => 'Read one Elementor page or template as an indented outline: every section, container and widget with its text, links, images and settings, marked [hidden on ...] where Elementor hides it on some devices or [HIDDEN ON EVERY DEVICE] where visitors never see it. detail=content (default) leaves out styling; detail=full includes every setting with global colours and fonts resolved. css=true adds the CSS Elementor generated for it. Read these for intent (what hides where, sticky, widget settings); for exact values, measure the rendered page, because kit, widget, responsive and custom CSS layers combine.',
         'properties'  => [
             'id'        => ['type' => 'integer', 'description' => 'Post ID from elementor_overview (a page, a template, or the kit).'],
             'detail'    => ['type' => 'string', 'enum' => ['content', 'full'], 'default' => 'content'],
